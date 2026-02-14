@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RED JACKPOT with ERY</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #fff5f5;
+        display: flex;
+        justify-content: center;
+        padding: 50px 20px;
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 720px;
+        background: #ffeaea;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(200, 80, 80, 0.15);
+        position: relative;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .title-main {
+        font-size: 38px;
+        color: #ff1e1e;
+    }
+
+    .title-sub {
+        font-size: 18px;
+        color: #b30000;
+        margin-left: 8px;
+    }
+
+    /* 🔴 커스텀 경고 박스 */
+    .alert-box {
+        position: absolute;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ff4d4d;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 999px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 600;
+        transition: top 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+        z-index: 10;
+    }
+
+    .alert-box.show {
+        top: -10px;
+        opacity: 1;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .input-group input {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #f2bcbc;
+        outline: none;
+    }
+
+    button {
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+        color: white;
+    }
+
+ .add-btn,
+.select-all-btn,
+.delete-selected-btn {
+    background-color: #ff6060;
+}
+
+.add-btn:hover,
+.select-all-btn:hover,
+.delete-selected-btn:hover {
+    background-color: #ff3030;
+}
+
+
+
+    .draw-btn {
+        background-color: #D41313;
+        width: 100%;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .draw-btn:hover {
+        background-color: #a80f0f;
+    }
+
+    .result {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #ffd6d6;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 700;
+        color: #b30000;
+        font-size: 18px;
+        display: none;
+    }
+
+    .list-wrapper {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #f2bcbc;
+        overflow: hidden;
+    }
+
+    .list-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .list-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid #f5d6d6;
+    }
+
+    .list-item:last-child {
+        border-bottom: none;
+    }
+
+    .entry-info {
+        display: flex;
+        gap: 10px;
+    }
+
+    input[type="checkbox"] {
+        accent-color: orange;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .list-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background: #ffd6d6;
+        border-top: 1px solid #f2bcbc;
+        font-weight: 600;
+    }
+
+    .total-count {
+        color: #b30000;
+        font-weight: 700;
+    }
+
+    .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 999;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 16px;
+        opacity: 0.8;
+        animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(-10vh) rotate(0deg); }
+        100% { transform: translateY(110vh) rotate(720deg); }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- 🔴 커스텀 경고 박스 -->
+    <div id="customAlert" class="alert-box">
+        <strong>주의!</strong>
+        <span>이름과 아이디를 모두 입력해주세요.</span>
+    </div>
+
+    <h1>
+        <span class="title-main">RED JACKPOT</span>
+        <span class="title-sub">with ERY</span>
+    </h1>
+
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="이름을 입력해주세요">
+        <input type="text" id="idInput" placeholder="ID를 입력해주세요">
+        <button class="add-btn" id="addButton">응모하기</button>
+    </div>
+
+    <button class="draw-btn" id="drawButton">추첨하기</button>
+
+    <div class="result" id="resultBox"></div>
+
+    <div class="list-wrapper">
+        <div class="list-container" id="entryList"></div>
+
+        <div class="list-footer">
+            <button class="select-all-btn" id="selectAllBtn">전체선택</button>
+            <div class="total-count" id="totalCount">총 응모 수 : 0개</div>
+            <button class="delete-selected-btn" id="deleteBtn">삭제하기</button>
+        </div>
+    </div>
+</div>
+
+<div id="confettiContainer" class="confetti-container"></div>
+
+<script>
+const entries = [];
+let alertTimeout;
+
+const nameInput = document.getElementById("nameInput");
+const idInput = document.getElementById("idInput");
+const addButton = document.getElementById("addButton");
+const resultBox = document.getElementById("resultBox");
+const alertBox = document.getElementById("customAlert");
+
+function showAlert() {
+    clearTimeout(alertTimeout);
+    alertBox.classList.add("show");
+
+    alertTimeout = setTimeout(() => {
+        alertBox.classList.remove("show");
+    }, 2000);
+}
+
+function updateTotalCount() {
+    document.getElementById("totalCount").innerText =
+        `총 응모 수 : ${entries.length}개`;
+}
+
+function addEntry() {
+    const name = nameInput.value.trim();
+    const id = idInput.value.trim();
+
+    if (!name || !id) {
+        showAlert();
+        return;
+    }
+
+    entries.push({ name, id });
+    renderList();
+    updateTotalCount();
+
+    nameInput.value = "";
+    idInput.value = "";
+    nameInput.focus();
+}
+
+function renderList() {
+    const list = document.getElementById("entryList");
+    list.innerHTML = "";
+
+    entries.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "list-item";
+
+        const wrapper = document.createElement("div");
+        wrapper.style.display = "flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "15px";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "entry-checkbox";
+        checkbox.dataset.index = index;
+
+        const info = document.createElement("div");
+        info.className = "entry-info";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = entry.name;
+
+        const idSpan = document.createElement("span");
+        idSpan.textContent = `(@${entry.id})`;
+
+        info.appendChild(nameSpan);
+        info.appendChild(idSpan);
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(info);
+        div.appendChild(wrapper);
+        list.appendChild(div);
+    });
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll(".entry-checkbox");
+    const allChecked = [...checkboxes].every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+}
+
+function deleteSelected() {
+    const checkboxes = document.querySelectorAll(".entry-checkbox");
+    const selectedIndexes = [];
+
+    checkboxes.forEach(cb => {
+        if (cb.checked) selectedIndexes.push(parseInt(cb.dataset.index));
+    });
+
+    if (selectedIndexes.length === 0) return;
+
+    selectedIndexes.sort((a,b)=>b-a);
+    selectedIndexes.forEach(i => entries.splice(i,1));
+
+    renderList();
+    updateTotalCount();
+    resultBox.style.display = "none";
+}
+
+function drawWinner() {
+    if (entries.length === 0) return;
+
+    const randomIndex = Math.floor(Math.random() * entries.length);
+    const winner = entries[randomIndex];
+
+    resultBox.style.display = "block";
+    resultBox.innerText = `🎉 당첨자: ${winner.name} (@${winner.id})`;
+
+    launchConfetti();
+}
+
+function launchConfetti() {
+    const container = document.getElementById("confettiContainer");
+    container.innerHTML = "";
+
+    for (let i = 0; i < 120; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor =
+            ["#ff1e1e","#ff6b6b","#ffb3b3","#d90429"][Math.floor(Math.random()*4)];
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + "s";
+        container.appendChild(confetti);
+    }
+
+    setTimeout(() => container.innerHTML = "", 5000);
+}
+
+addButton.addEventListener("click", addEntry);
+document.getElementById("drawButton").addEventListener("click", drawWinner);
+document.getElementById("selectAllBtn").addEventListener("click", toggleSelectAll);
+document.getElementById("deleteBtn").addEventListener("click", deleteSelected);
+
+nameInput.addEventListener("keydown", e => { if (e.key === "Enter") addEntry(); });
+idInput.addEventListener("keydown", e => { if (e.key === "Enter") addEntry(); });
+</script>
+
+</body>
+</html>
